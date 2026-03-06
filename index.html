@@ -2,108 +2,55 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>chrozom2</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500&display=swap" rel="stylesheet">
 
 <style>
-:root{
---bg-light:#fff3e6;
---bg-dark:#1e1b2e;
---card-light:#ffffffcc;
---card-dark:#2a2740cc;
---text-light:#2b2b2b;
---text-dark:#ffffff;
-}
 
 body{
 margin:0;
 font-family:'Fredoka',sans-serif;
-background:var(--bg-light);
-color:var(--text-light);
-transition:0.4s;
-overflow-x:hidden;
-}
-
-body.dark{
-background:var(--bg-dark);
-color:var(--text-dark);
+background:linear-gradient(180deg,#ffe7c2,#ffc97a);
+color:#4b2e15;
+text-align:center;
+cursor:url("https://cur.cursors-4u.net/games/gam-15/gam1426.cur"), auto;
 }
 
 header{
-height:60vh;
-display:flex;
-justify-content:center;
-align-items:center;
-text-align:center;
-font-size:48px;
-font-weight:600;
+font-size:50px;
+margin:40px;
 }
 
 .gallery{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
+gap:25px;
 padding:40px;
 }
 
 .card{
-background:var(--card-light);
-border-radius:20px;
-overflow:hidden;
-backdrop-filter:blur(10px);
-box-shadow:0 10px 25px rgba(0,0,0,0.15);
-cursor:pointer;
+background:white;
+border-radius:25px;
+padding:10px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
 transition:0.3s;
-}
-
-body.dark .card{
-background:var(--card-dark);
+cursor:pointer;
 }
 
 .card:hover{
-transform:translateY(-6px) scale(1.03);
+transform:scale(1.08);
 }
 
 .card img{
 width:100%;
-height:220px;
-object-fit:cover;
-display:block;
-}
-
-.upload{
-position:fixed;
-top:20px;
-left:20px;
-z-index:5;
-}
-
-.theme-toggle{
-position:fixed;
-bottom:20px;
-right:20px;
-padding:12px 16px;
-border-radius:50px;
-border:none;
-cursor:pointer;
-font-size:16px;
-box-shadow:0 4px 12px rgba(0,0,0,0.25);
-}
-
-.telegram{
-position:fixed;
-bottom:20px;
-left:20px;
-width:42px;
-cursor:pointer;
+border-radius:20px;
 }
 
 .viewer{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,0.7);
+background:rgba(0,0,0,0.8);
 backdrop-filter:blur(8px);
 display:none;
 align-items:center;
@@ -111,24 +58,22 @@ justify-content:center;
 }
 
 .viewer img{
-max-width:85%;
-max-height:85%;
+max-width:80%;
+max-height:80%;
 border-radius:20px;
-box-shadow:0 20px 40px rgba(0,0,0,0.6);
 }
 
 .arrow{
 position:absolute;
 top:50%;
-font-size:60px;
+font-size:70px;
 color:white;
 cursor:pointer;
 user-select:none;
-padding:20px;
 }
 
-.arrow.left{left:30px}
-.arrow.right{right:30px}
+.left{left:40px}
+.right{right:40px}
 
 .close{
 position:absolute;
@@ -138,88 +83,155 @@ font-size:40px;
 color:white;
 cursor:pointer;
 }
+
+.telegram{
+position:fixed;
+bottom:20px;
+left:20px;
+width:50px;
+}
+
+.theme{
+position:fixed;
+bottom:20px;
+right:20px;
+padding:12px 16px;
+border:none;
+border-radius:20px;
+font-size:18px;
+cursor:pointer;
+}
+
+.music{
+position:fixed;
+bottom:90px;
+right:20px;
+background:white;
+padding:10px;
+border-radius:15px;
+}
+
+button:hover{
+transform:scale(1.1);
+}
+
 </style>
 </head>
 
 <body>
 
-<header id="titleText">ТВОЙ ТЕКСТ ЗДЕСЬ</header>
-
-<div class="upload">
-<input type="file" id="fileInput" multiple accept="image/*">
-</div>
+<header>chrozom2</header>
 
 <section class="gallery" id="gallery"></section>
 
-<button class="theme-toggle" onclick="toggleTheme()">🌗</button>
+<img class="telegram"
+src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png"
+onclick="openTG()">
 
-<img class="telegram" src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" onclick="openTelegram()">
+<button class="theme" onclick="toggleTheme()">🌗</button>
+
+<div class="music">
+🎵 <input type="range" min="0" max="1" step="0.01" value="0.4" id="volume">
+</div>
+
+<audio id="music" loop autoplay>
+<source src="music.mp3">
+</audio>
 
 <div class="viewer" id="viewer">
-<div class="arrow left" onclick="prevImg()">❮</div>
-<img id="viewerImg">
-<div class="arrow right" onclick="nextImg()">❯</div>
+
+<div class="arrow left" onclick="prev()">❮</div>
+
+<img id="bigImg">
+
+<div class="arrow right" onclick="next()">❯</div>
+
 <div class="close" onclick="closeViewer()">✕</div>
+
 </div>
 
 <script>
-let gallery=document.getElementById('gallery')
-let input=document.getElementById('fileInput')
-let viewer=document.getElementById('viewer')
-let viewerImg=document.getElementById('viewerImg')
 
-let images=[]
-let currentIndex=0
+let images=[
+"images/photo1.jpg",
+"images/photo2.jpg",
+"images/photo3.jpg"
+]
 
-input.addEventListener('change',e=>{
-[...e.target.files].forEach(file=>{
-let url=URL.createObjectURL(file)
-images.push(url)
-addCard(url,images.length-1)
-})
-})
+let gallery=document.getElementById("gallery")
 
-function addCard(src,index){
-let div=document.createElement('div')
-div.className='card'
+images.forEach((src,i)=>{
 
-let img=document.createElement('img')
+let card=document.createElement("div")
+card.className="card"
+
+let img=document.createElement("img")
 img.src=src
 
-img.onclick=()=>openViewer(index)
+img.onclick=()=>openViewer(i)
 
-div.appendChild(img)
+card.appendChild(img)
+gallery.appendChild(card)
 
-gallery.appendChild(div)
-}
+})
+
+let viewer=document.getElementById("viewer")
+let bigImg=document.getElementById("bigImg")
+
+let index=0
 
 function openViewer(i){
-currentIndex=i
-viewer.style.display='flex'
-viewerImg.src=images[currentIndex]
+
+index=i
+viewer.style.display="flex"
+bigImg.src=images[index]
+
 }
 
 function closeViewer(){
-viewer.style.display='none'
+
+viewer.style.display="none"
+
 }
 
-function nextImg(){
-currentIndex=(currentIndex+1)%images.length
-viewerImg.src=images[currentIndex]
+function next(){
+
+index=(index+1)%images.length
+bigImg.src=images[index]
+
 }
 
-function prevImg(){
-currentIndex=(currentIndex-1+images.length)%images.length
-viewerImg.src=images[currentIndex]
+function prev(){
+
+index=(index-1+images.length)%images.length
+bigImg.src=images[index]
+
 }
 
 function toggleTheme(){
-document.body.classList.toggle('dark')
+
+document.body.style.background=
+document.body.style.background.includes("ffc97a")
+? "linear-gradient(180deg,#1e1b2e,#3a3559)"
+: "linear-gradient(180deg,#ffe7c2,#ffc97a)"
+
 }
 
-function openTelegram(){
-window.location.href="https://t.me/YOUR_LINK"
+function openTG(){
+
+window.open("https://t.me/YOUR_LINK","_blank")
+
 }
+
+let music=document.getElementById("music")
+let volume=document.getElementById("volume")
+
+volume.addEventListener("input",()=>{
+
+music.volume=volume.value
+
+})
+
 </script>
 
 </body>
